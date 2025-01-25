@@ -1,0 +1,23 @@
+function current_branch() {
+  if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
+    git rev-parse --abbrev-ref HEAD
+  else
+    echo "Not in a Git repository."
+  fi
+}
+
+# general
+alias zshrc="nvim ~/meza-profile-zsh/.zsh-profile"
+alias refresh="source ~/meza-profile-zsh/.zsh-profile"
+
+# git
+alias save="git add . && git commit -m \"checkpoint\" && git push origin $(current_branch)"
+alias ga="git add ."
+alias gacm="git add . && git commit -m"
+alias gpso="git push origin"
+alias gplo="git push origin"
+alias gpsoc="git push origin $(current_branch)"
+alias gm="git merge"
+alias gs="git status"
+alias gl="git log"
+alias lg="lazygit"
