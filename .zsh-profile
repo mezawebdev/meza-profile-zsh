@@ -1,13 +1,44 @@
-export sandbox_dir="$HOME/Sandbox"
+#!/bin/zsh
 
-current_branch() {
-  if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
-    git rev-parse --abbrev-ref HEAD
-  else
-    echo "Not in a Git repository."
-  fi
+export sandbox_dir="$HOME/Sandbox"
+export projects_dir="$HOME/Projects"
+
+# general
+alias zshrc="nvim ~/meza-profile-zsh/.zsh-profile"
+alias refresh="source ~/meza-profile-zsh/.zsh-profile"
+
+# projects
+alias projects="cd ${projects_dir}"
+
+# git
+gpsoc() {
+  git push origin $(git rev-parse --abbrev-ref HEAD)
 }
 
+save() {
+  git add . && git commit -m \"checkpoint\" && git push origin $(git rev-parse --abbrev-ref HEAD)
+}
+
+alias ga="git add ."
+alias gacm="git add . && git commit -m"
+alias gpso="git push origin"
+alias gplo="git pull origin"
+alias gpsod="git push origin development"
+alias gplod="git pull origin development"
+alias gpsom="git pull origin main"
+alias gplom="git pull origin main"
+alias gm="git merge"
+alias gs="git status"
+alias gl="git log"
+alias lg="lazygit"
+
+# docker
+alias dc-rs="docker compose down && docker compose up"
+alias dc-dw="docker compose down"
+alias dc-up="docker compose up"
+alias dc-upd="docker compose up -d"
+
+# sandbox
 js-sandbox-new() {
   local min=${1:-1}
   local max=${2:-100}
@@ -21,24 +52,7 @@ js-sandbox-new() {
   code ${sandbox_path}
 }
 
-# general
-alias zshrc="nvim ~/meza-profile-zsh/.zsh-profile"
-alias refresh="source ~/meza-profile-zsh/.zsh-profile"
-
-# locations
-alias projects="cd ~/Projects"
-
-# git
-alias save="git add . && git commit -m \"checkpoint\" && git push origin $(current_branch)"
-alias ga="git add ."
-alias gacm="git add . && git commit -m"
-alias gpso="git push origin"
-alias gplo="git pull origin"
-alias gpsoc="git push origin $(current_branch)"
-alias gm="git merge"
-alias gs="git status"
-alias gl="git log"
-alias lg="lazygit"
-
-# sandbox
+alias sandbox="cd ${sandbox_dir}"
 alias purge-sandbox="rm -rf ${sandbox_dir} && mkdir ${sandbox_dir}"
+
+source $HOME/meza-profile-zsh/.local-profile
