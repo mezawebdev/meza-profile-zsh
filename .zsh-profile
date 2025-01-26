@@ -34,6 +34,7 @@ alias lg="lazygit"
 
 # docker
 alias dc-rs="docker compose down && docker compose up"
+alias dc-rsd="docker compose down && docker compose up -d"
 alias dc-dw="docker compose down"
 alias dc-up="docker compose up"
 alias dc-upd="docker compose up -d"
