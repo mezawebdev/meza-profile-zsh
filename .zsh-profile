@@ -33,6 +33,10 @@ alias gl="git log"
 alias lg="lazygit"
 
 # docker
+dc-it() {
+  docker exec -it $1 bash
+}
+
 alias dc-rs="docker compose down && docker compose up"
 alias dc-rsd="docker compose down && docker compose up -d"
 alias dc-dw="docker compose down"
