@@ -3,8 +3,14 @@
 export sandbox_dir="$HOME/Sandbox"
 export projects_dir="$HOME/Projects"
 
+# executables
+export PATH="$HOME/meza-profile-zsh/bin:$PATH"
+
 # general
 alias zshrc="nvim ~/meza-profile-zsh/.zsh-profile"
+alias zshrco="nvim ~/meza-profile-zsh"
+alias zshrc-go="cd ~/meza-profile-zsh"
+alias zshrc-local="nvim ~/meza-profile-zsh/.local-profile"
 alias refresh="source ~/meza-profile-zsh/.zsh-profile"
 
 # projects
