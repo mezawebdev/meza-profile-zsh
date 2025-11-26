@@ -26,6 +26,32 @@ def get_staged_diff():
         sys.exit(1)
 
 
+def copy_to_clipboard(text):
+    """Runs pbcopy internally so Lazygit doesn't have to manage pipes."""
+    try:
+        process = subprocess.Popen(
+            'pbcopy', env={'LANG': 'en_US.UTF-8'}, stdin=subprocess.PIPE)
+        process.communicate(text.encode('utf-8'))
+    except Exception as e:
+        print(f"Clipboard Error: {e}", file=sys.stderr)
+
+
+def show_notification(message):
+    """
+    Uses macOS native 'osascript' to show a notification.
+    This works even in the background!
+    """
+    try:
+        cmd = [
+            'osascript',
+            '-e',
+            f'display notification "{message}" with title "Lazygit AI"'
+        ]
+        subprocess.run(cmd, check=False)
+    except Exception:
+        pass  # Ignore if it fails, it's just a nicety
+
+
 def generate_commit_message(diff: str):
     """Call Z.ai / GLM-4 API to generate a commit message."""
     if not API_KEY:
@@ -107,4 +133,8 @@ def generate_commit_message(diff: str):
 if __name__ == "__main__":
     diff = get_staged_diff()
     msg = generate_commit_message(diff)
-    print(msg)
+
+    if msg:
+        copy_to_clipboard(msg)
+        show_notification("Commit message copied to clipboard!")
+        print(msg)

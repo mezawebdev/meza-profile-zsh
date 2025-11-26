@@ -1,17 +1,8 @@
 customCommands:
   - key: "<c-a>"
-    description: "AI Commit (Review)"
+    description: "Generate AI Commit"
     context: "files"
-    loadingText: "🤖 AI is thinking... (Gemini 2.5)"
-    prompts:
-      - type: "menuFromCommand"
-        title: "Select AI Message"
-        key: "Msg"
-        command: 'sh -c "python $HOME/meza-profile-zsh/bin/ai_commit_generator"'
-        filter: "^(?P<msg>.*)$"
-        valueFormat: "{{.msg}}"
-        labelFormat: "{{.msg}}"
-      - type: "input"
-        title: "Edit Commit Message"
-        initialValue: "{{index .PromptResponses 0}}"
-    command: 'git commit -m "{{index .PromptResponses 1}}"'
+    outputTitle: "\U0001F916 Commit Message Generated"
+    loadingText: "\U0001F916 AI is thinking..."
+    command: 'sh -c "python $HOME/meza-profile-zsh/bin/ai_commit_generator"'
+    output: popup
