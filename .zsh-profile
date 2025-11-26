@@ -17,12 +17,18 @@ alias refresh="source ~/meza-profile-zsh/.zsh-profile"
 alias projects="cd ${projects_dir}"
 
 # git
+export LG_CONFIG_FILE="$HOME/meza-profile-zsh/lazygit/config.yml"
+
 gpsoc() {
   git push origin $(git rev-parse --abbrev-ref HEAD)
 }
 
 save() {
   git add . && git commit -m \"checkpoint\" && git push origin $(git rev-parse --abbrev-ref HEAD)
+}
+
+ai-commit-generator() {
+  python ~/meza-profile-zsh/bin/ai_commit_generator
 }
 
 alias ga="git add ."
