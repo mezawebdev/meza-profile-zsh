@@ -6,3 +6,7 @@ customCommands:
     loadingText: "\U0001F916 AI is thinking..."
     command: 'sh -c "python $HOME/meza-profile-zsh/bin/ai_commit_generator"'
     output: popup
+git:
+  pagers:
+    - colorArg: always
+      pager: delta --paging=never 
