@@ -72,4 +72,7 @@ js-sandbox-new() {
 alias sandbox="cd ${sandbox_dir}"
 alias purge-sandbox="rm -rf ${sandbox_dir} && mkdir ${sandbox_dir}"
 
+# agents
+CLAUDE_CONFIG_DIR="~/meza-profile-zsh/claude"
+
 source $HOME/meza-profile-zsh/.local-profile

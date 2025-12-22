@@ -1,2 +1,4 @@
 .local-profile
 .DS_Store
+claude
+!claude/settings.json
