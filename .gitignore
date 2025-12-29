@@ -1,4 +1,5 @@
 .local-profile
 .DS_Store
-claude
+claude/*
 !claude/settings.json
+!claude/agents/

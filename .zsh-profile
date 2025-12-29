@@ -55,6 +55,9 @@ alias dc-dw="docker compose down"
 alias dc-up="docker compose up"
 alias dc-upd="docker compose up -d"
 
+# cli stuff
+alias glows="glow --s ~/meza-profile-zsh/glow/theme.json"
+
 # sandbox
 js-sandbox-new() {
   local min=${1:-1}
@@ -73,6 +76,8 @@ alias sandbox="cd ${sandbox_dir}"
 alias purge-sandbox="rm -rf ${sandbox_dir} && mkdir ${sandbox_dir}"
 
 # agents
-CLAUDE_CONFIG_DIR="~/meza-profile-zsh/claude"
+export CLAUDE_CONFIG_DIR="$HOME/meza-profile-zsh/claude"
+
+# export EDITOR="code --wait"
 
 source $HOME/meza-profile-zsh/.local-profile

@@ -9,4 +9,6 @@ customCommands:
 git:
   pagers:
     - colorArg: always
-      pager: delta --paging=never 
+      pager: delta --paging=never
+os:
+  editPreset: "zed"

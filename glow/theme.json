@@ -1,0 +1,48 @@
+{
+  "document": {
+    "block_prefix": "",
+    "block_suffix": "",
+    "margin": 0
+  },
+  "code_block": {
+    "chroma": {
+      "text": {
+        "color": "#F8F8F2"
+      },
+      "error": {
+        "color": "#F8F8F2",
+        "background_color": "#FF5555"
+      },
+      "comment": {
+        "color": "#6272A4"
+      },
+      "keyword": {
+        "color": "#FF79C6"
+      },
+      "namespace": {
+        "color": "#FF79C6"
+      },
+      "punctuation": {
+        "color": "#F8F8F2"
+      },
+      "name": {
+        "color": "#F8F8F2"
+      },
+      "tag": {
+        "color": "#FF79C6"
+      },
+      "attribute": {
+        "color": "#50FA7B"
+      },
+      "literal": {
+        "color": "#F1FA8C"
+      },
+      "number": {
+        "color": "#BD93F9"
+      },
+      "string": {
+        "color": "#F1FA8C"
+      }
+    }
+  }
+}
