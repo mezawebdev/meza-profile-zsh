@@ -56,7 +56,7 @@ alias dc-up="docker compose up"
 alias dc-upd="docker compose up -d"
 
 # cli stuff
-alias glows="glow --s ~/meza-profile-zsh/glow/theme.json"
+alias glows="glow -s ~/meza-profile-zsh/glow/theme.json"
 
 # sandbox
 js-sandbox-new() {
