@@ -58,6 +58,9 @@ alias dc-upd="docker compose up -d"
 # cli stuff
 alias glows="glow -s ~/meza-profile-zsh/glow/theme.json"
 
+# tools
+alias zellij="$HOME/zellij"
+
 # sandbox
 js-sandbox-new() {
   local min=${1:-1}
