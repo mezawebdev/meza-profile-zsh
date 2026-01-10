@@ -43,6 +43,7 @@ alias gm="git merge"
 alias gs="git status"
 alias gl="git log"
 alias lg="lazygit"
+alias nwt="new-worktree"
 
 # docker
 dc-it() {

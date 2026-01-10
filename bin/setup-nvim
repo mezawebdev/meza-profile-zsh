@@ -1,0 +1,30 @@
+#!/bin/bash
+
+REPO_DIR="$HOME/meza-profile-zsh"
+NVIM_SOURCE="$REPO_DIR/nvim"
+NVIM_TARGET="$HOME/.config/nvim"
+
+# Check if source exists
+if [ ! -d "$NVIM_SOURCE" ]; then
+  echo "Error: $NVIM_SOURCE does not exist"
+  echo "Make sure your nvim config is in the repo first"
+  exit 1
+fi
+
+# Ensure ~/.config exists
+mkdir -p "$HOME/.config"
+
+# Handle existing nvim config
+if [ -L "$NVIM_TARGET" ]; then
+  echo "Symlink already exists at $NVIM_TARGET"
+  echo "Current target: $(readlink "$NVIM_TARGET")"
+  exit 0
+elif [ -d "$NVIM_TARGET" ]; then
+  echo "Existing nvim config found at $NVIM_TARGET"
+  echo "Backing up to ${NVIM_TARGET}.backup"
+  mv "$NVIM_TARGET" "${NVIM_TARGET}.backup"
+fi
+
+# Create symlink
+ln -s "$NVIM_SOURCE" "$NVIM_TARGET"
+echo "Created symlink: $NVIM_TARGET -> $NVIM_SOURCE"

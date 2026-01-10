@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Create a new git worktree with a corresponding branch."""
+
+import os
+import subprocess
+import sys
+
+
+def run_git_command(args: list[str]) -> str:
+    """Run a git command and return the output."""
+    result = subprocess.run(
+        ["git"] + args,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or result.stdout.strip())
+    return result.stdout.strip()
+
+
+def get_repo_name() -> str:
+    """Get the current repository name from the repo root directory."""
+    repo_root = run_git_command(["rev-parse", "--show-toplevel"])
+    return os.path.basename(repo_root)
+
+
+def get_current_branch() -> str:
+    """Get the current branch name."""
+    return run_git_command(["branch", "--show-current"])
+
+
+def main() -> None:
+    # Check if we're in a git repository
+    try:
+        run_git_command(["rev-parse", "--git-dir"])
+    except RuntimeError:
+        print("Error: Not inside a git repository.", file=sys.stderr)
+        sys.exit(1)
+
+    # Get worktree name from argument or prompt
+    if len(sys.argv) > 1:
+        worktree_name = sys.argv[1]
+    else:
+        worktree_name = input("Enter worktree name: ").strip()
+        if not worktree_name:
+            print("Error: Worktree name cannot be empty.", file=sys.stderr)
+            sys.exit(1)
+
+    try:
+        repo_name = get_repo_name()
+        base_branch = get_current_branch()
+    except RuntimeError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # Construct the full worktree/branch name
+    full_name = f"{repo_name}-{base_branch}-{worktree_name}"
+    worktree_path = os.path.expanduser(f"~/Worktrees/{full_name}")
+
+    # Ensure ~/Worktrees directory exists
+    worktrees_dir = os.path.expanduser("~/Worktrees")
+    os.makedirs(worktrees_dir, exist_ok=True)
+
+    # Create the worktree with a new branch
+    try:
+        run_git_command(["worktree", "add", "-b", full_name, worktree_path])
+        print(f"Created worktree at: {worktree_path}")
+        print(f"Created branch: {full_name}")
+    except RuntimeError as e:
+        print(f"Error creating worktree: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
