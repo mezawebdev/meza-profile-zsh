@@ -1,27 +1,18 @@
 return {
   {
-    "lewis6991/satellite.nvim",
+    "petertriho/nvim-scrollbar",
     event = "VeryLazy",
     opts = {
-      current_only = false,
-      winblend = 50,
-      zindex = 40,
+      handle = {
+        text = " ",
+        blend = 40,
+        hide_if_all_visible = true,
+      },
       handlers = {
-        cursor = { enable = true },
-        search = { enable = true },
-        diagnostic = {
-          enable = true,
-          signs = { "-", "=", "≡" }, -- less, equal, more severity
-        },
-        gitsigns = {
-          enable = true,
-          signs = {
-            add = "│",
-            change = "│",
-            delete = "_",
-          },
-        },
-        marks = { enable = true },
+        cursor = true,
+        diagnostic = true,
+        gitsigns = true,
+        search = false, -- requires hlslens
       },
     },
   },
