@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Create a new git worktree with a corresponding branch."""
 
+import glob
 import os
+import shutil
 import subprocess
 import sys
 
@@ -18,15 +20,89 @@ def run_git_command(args: list[str]) -> str:
     return result.stdout.strip()
 
 
-def get_repo_name() -> str:
+def get_repo_root() -> str:
+    """Get the repository root directory."""
+    return run_git_command(["rev-parse", "--show-toplevel"])
+
+
+def get_repo_name(repo_root: str) -> str:
     """Get the current repository name from the repo root directory."""
-    repo_root = run_git_command(["rev-parse", "--show-toplevel"])
     return os.path.basename(repo_root)
 
 
 def get_current_branch() -> str:
     """Get the current branch name."""
     return run_git_command(["branch", "--show-current"])
+
+
+SKIP_DIRS = {
+    "node_modules",
+    "vendor",
+    ".git",
+    ".hg",
+    ".svn",
+    ".worktrees",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "dist",
+    "build",
+    ".next",
+    ".nuxt",
+    "coverage",
+    ".cache",
+    "target",
+}
+
+# Files to copy over (gitignored config files needed for local dev)
+COPY_PATTERNS = {
+    ".env",      # .env, .env.local, .env.test, .env.production, etc.
+    ".nvmrc",
+    ".npmrc",
+    ".node-version",
+}
+
+
+def should_copy_file(filename: str) -> bool:
+    """Check if a file should be copied based on patterns."""
+    for pattern in COPY_PATTERNS:
+        if filename == pattern or filename.startswith(f"{pattern}."):
+            return True
+    return False
+
+
+def copy_config_files(source_dir: str, dest_dir: str) -> list[str]:
+    """Copy config files from source to destination, preserving directory structure."""
+    copied = []
+    for root, dirs, files in os.walk(source_dir):
+        # Skip vendor directories
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+
+        for filename in files:
+            if should_copy_file(filename):
+                source_path = os.path.join(root, filename)
+                # Get relative path from source_dir
+                rel_path = os.path.relpath(source_path, source_dir)
+                dest_path = os.path.join(dest_dir, rel_path)
+
+                # Create destination directory if needed
+                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+
+                shutil.copy2(source_path, dest_path)
+                copied.append(rel_path)
+    return copied
+
+
+def run_setup_commands(worktree_path: str) -> None:
+    """Run nvm use and npm install in the worktree."""
+    bash_command = 'source ~/.nvm/nvm.sh && nvm use && npm i'
+    result = subprocess.run(
+        ["bash", "-c", bash_command],
+        cwd=worktree_path,
+        capture_output=False,
+    )
+    if result.returncode != 0:
+        print("Warning: Setup commands may have failed.", file=sys.stderr)
 
 
 def main() -> None:
@@ -41,13 +117,15 @@ def main() -> None:
     if len(sys.argv) > 1:
         worktree_name = sys.argv[1]
     else:
-        worktree_name = input("Enter worktree name: ").strip()
+        print("Enter worktree name: ", end="", file=sys.stderr, flush=True)
+        worktree_name = input().strip()
         if not worktree_name:
             print("Error: Worktree name cannot be empty.", file=sys.stderr)
             sys.exit(1)
 
     try:
-        repo_name = get_repo_name()
+        repo_root = get_repo_root()
+        repo_name = get_repo_name(repo_root)
         base_branch = get_current_branch()
     except RuntimeError as e:
         print(f"Error: {e}", file=sys.stderr)
@@ -64,11 +142,27 @@ def main() -> None:
     # Create the worktree with a new branch
     try:
         run_git_command(["worktree", "add", "-b", full_name, worktree_path])
-        print(f"Created worktree at: {worktree_path}")
-        print(f"Created branch: {full_name}")
+        print(f"Created worktree at: {worktree_path}", file=sys.stderr)
+        print(f"Created branch: {full_name}", file=sys.stderr)
     except RuntimeError as e:
         print(f"Error creating worktree: {e}", file=sys.stderr)
         sys.exit(1)
+
+    # Copy config files from the source repo (recursively)
+    copied_files = copy_config_files(repo_root, worktree_path)
+    if copied_files:
+        print(f"Copied {len(copied_files)} config file(s):", file=sys.stderr)
+        for f in copied_files:
+            print(f"  {f}", file=sys.stderr)
+    else:
+        print("No config files found to copy", file=sys.stderr)
+
+    # Run nvm use and npm install
+    print("Running nvm use && npm i...", file=sys.stderr)
+    run_setup_commands(worktree_path)
+
+    # Print the path to stdout for shell wrapper to capture
+    print(worktree_path)
 
 
 if __name__ == "__main__":

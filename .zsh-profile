@@ -43,7 +43,13 @@ alias gm="git merge"
 alias gs="git status"
 alias gl="git log"
 alias lg="lazygit"
-alias nwt="new-worktree"
+nwt() {
+  local worktree_path
+  worktree_path=$(new-worktree "$@")
+  if [[ $? -eq 0 && -n "$worktree_path" ]]; then
+    cd "$worktree_path"
+  fi
+}
 
 # docker
 dc-it() {
