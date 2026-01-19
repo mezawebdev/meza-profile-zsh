@@ -1,0 +1,25 @@
+name: "Wave Style"
+accent: "#58c142"
+background: "#1e1e1e"
+foreground: "#c8c8c8"
+cursor: "#58c142"
+details: darker
+terminal_colors:
+  normal:
+    black: "#000000"
+    red: "#cc0000"
+    green: "#4e9a06"
+    yellow: "#c4a000"
+    blue: "#3465a4"
+    magenta: "#bc3fbc"
+    cyan: "#06989a"
+    white: "#e0e0e0"
+  bright:
+    black: "#555753"
+    red: "#ef2929"
+    green: "#58c142"
+    yellow: "#fce94f"
+    blue: "#32afff"
+    magenta: "#ad7fa8"
+    cyan: "#34e2e2"
+    white: "#eeeeee"
