@@ -13,9 +13,11 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "input=$(cat); branch=$(echo \"$input\" | jq -r '.workspace.project_dir' | xargs -I {} git -C {} rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'no-git'); model=$(echo \"$input\" | jq -r '.model.display_name'); project=$(echo \"$input\" | jq -r '.workspace.project_dir' | xargs basename); usage=$(echo \"$input\" | jq '.context_window.current_usage'); if [ \"$usage\" != \"null\" ]; then current=$(echo \"$usage\" | jq '.input_tokens + .cache_creation_input_tokens + .cache_read_input_tokens'); size=$(echo \"$input\" | jq '.context_window.context_window_size'); pct=$((current * 100 / size)); context=\"${pct}%\"; else context=\"0%\"; fi; printf \"branch: %s | model: %s | dir: %s | ctx: %s\" \"$branch\" \"$model\" \"$project\" \"$context\""
+    "command": "input=$(cat); branch=$(echo \"$input\" | jq -r '.workspace.project_dir' | xargs -I {} git -C {} rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'no-git'); model=$(echo \"$input\" | jq -r '.model.display_name'); project=$(echo \"$input\" | jq -r '.workspace.project_dir' | xargs basename); total_in=$(echo \"$input\" | jq -r '.context_window.total_input_tokens'); total_out=$(echo \"$input\" | jq -r '.context_window.total_output_tokens'); used=$((total_in + total_out)); pct=$(echo \"$input\" | jq -r '.context_window.used_percentage'); printf \"branch: %s | model: %s | dir: %s | tokens: %s | ctx: %s%%\" \"$branch\" \"$model\" \"$project\" \"$used\" \"$pct\""
   },
   "enabledPlugins": {
-    "superpowers@superpowers-marketplace": true
+    "superpowers@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true
   }
 }
