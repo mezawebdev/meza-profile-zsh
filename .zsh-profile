@@ -87,6 +87,7 @@ alias purge-sandbox="rm -rf ${sandbox_dir} && mkdir ${sandbox_dir}"
 
 # agents
 export CLAUDE_CONFIG_DIR="$HOME/meza-profile-zsh/claude"
+alias claude-danger="claude --allow-dangerously-skip-permissions"
 
 # export EDITOR="code --wait"
 
