@@ -1,0 +1,25 @@
+name: "Prominent Focus"
+accent: "#00E5FF" # Electric Cyan
+background: "#181A1B" # Exact dark charcoal from your Wave screenshot
+foreground: "#E0E0E0"
+cursor: "#FF00FF" # High-contrast Neon Magenta
+details: darker
+terminal_colors:
+  normal:
+    black: "#181A1B"
+    red: "#FF5252"
+    green: "#58C142" # From your Wave working theme
+    yellow: "#FFD740"
+    blue: "#00E5FF"
+    magenta: "#FF00FF"
+    cyan: "#7FFFD4" # The Aquamarine prompt color
+    white: "#E0E0E0"
+  bright:
+    black: "#555753"
+    red: "#FF5252"
+    green: "#58C142"
+    yellow: "#FFD740"
+    blue: "#00E5FF"
+    cyan: "#7FFFD4"
+    magenta: "#FF00FF"
+    white: "#FFFFFF"
