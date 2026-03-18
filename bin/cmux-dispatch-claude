@@ -1,0 +1,131 @@
+#!/bin/bash
+# cmux-dispatch-claude - Launch Claude Code session(s) in new cmux tab(s)
+#
+# Usage:
+#   cmux-dispatch-claude "Fix the bug in editor-canvas.tsx..."
+#   cmux-dispatch-claude -f prompt.txt
+#   cmux-dispatch-claude -b prompts/          # batch: one session per .txt file
+#   cmux-dispatch-claude -d ~/Projects/bandworks "Fix the bug..."
+#   echo "Fix the bug..." | cmux-dispatch-claude
+#
+# Options:
+#   -f <file>    Read prompt from file
+#   -b <dir>     Batch mode: launch one session per .txt file in directory
+#   -d <dir>     Working directory (defaults to current directory)
+#   -n <name>    Tab name (shown in cmux tab, single mode only)
+
+set -euo pipefail
+
+WORK_DIR="$(pwd)"
+TAB_NAME=""
+PROMPT=""
+PROMPT_FILE=""
+BATCH_DIR=""
+
+# Parse options
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f)
+      PROMPT_FILE="$2"
+      shift 2
+      ;;
+    -b)
+      BATCH_DIR="$2"
+      shift 2
+      ;;
+    -d)
+      WORK_DIR="$2"
+      shift 2
+      ;;
+    -n)
+      TAB_NAME="$2"
+      shift 2
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      PROMPT="$1"
+      shift
+      ;;
+  esac
+done
+
+# Dispatch a single prompt to a new cmux tab
+# Args: $1 = prompt text, $2 = tab name (optional)
+dispatch_one() {
+  local prompt="$1"
+  local name="${2:-}"
+
+  # Save prompt to temp file (avoids escaping issues)
+  local temp_file
+  mkdir -p /tmp/cmux/dispatch
+  temp_file="/tmp/cmux/dispatch/$(date +%s)-$RANDOM.txt"
+  printf '%s' "$prompt" > "$temp_file"
+
+  # Create new cmux tab
+  local result
+  result="$(cmux new-surface 2>&1)"
+  local surface_id
+  surface_id="$(echo "$result" | awk '{print $2}')"
+
+  if [[ -z "$surface_id" ]]; then
+    echo "Error: Failed to create cmux surface." >&2
+    echo "$result" >&2
+    rm -f "$temp_file"
+    return 1
+  fi
+
+  # Rename tab if name provided
+  if [[ -n "$name" ]]; then
+    cmux rename-tab --surface "$surface_id" "$name" 2>/dev/null || true
+  fi
+
+  # Let the shell initialize
+  sleep 0.3
+
+  # Send command to the new tab
+  cmux send --surface "$surface_id" "cd $WORK_DIR && claude --dangerously-skip-permissions --chrome < $temp_file; rm -f $temp_file"
+  cmux send-key --surface "$surface_id" enter
+
+  echo "Dispatched${name:+ [$name]} to $surface_id"
+}
+
+# Batch mode: one session per .txt file
+if [[ -n "$BATCH_DIR" ]]; then
+  if [[ ! -d "$BATCH_DIR" ]]; then
+    echo "Error: Batch directory not found: $BATCH_DIR" >&2
+    exit 1
+  fi
+
+  count=0
+  for file in "$BATCH_DIR"/*.txt; do
+    [[ -f "$file" ]] || continue
+    name="$(basename "$file" .txt)"
+    prompt="$(cat "$file")"
+    dispatch_one "$prompt" "$name"
+    count=$((count + 1))
+    sleep 0.5  # stagger launches
+  done
+
+  echo "Dispatched $count session(s)"
+  exit 0
+fi
+
+# Single mode: read prompt from file, argument, or stdin
+if [[ -n "$PROMPT_FILE" ]]; then
+  PROMPT="$(cat "$PROMPT_FILE")"
+elif [[ -z "$PROMPT" ]] && [[ ! -t 0 ]]; then
+  PROMPT="$(cat)"
+fi
+
+if [[ -z "$PROMPT" ]]; then
+  echo "Error: No prompt provided." >&2
+  echo "Usage: cmux-dispatch-claude \"your prompt here\"" >&2
+  echo "       cmux-dispatch-claude -f prompt.txt" >&2
+  echo "       cmux-dispatch-claude -b prompts/" >&2
+  exit 1
+fi
+
+dispatch_one "$PROMPT" "$TAB_NAME"
