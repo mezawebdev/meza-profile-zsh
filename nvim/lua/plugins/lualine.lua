@@ -15,7 +15,7 @@ return {
         S = "✨ S-LINE",
       }
 
-      -- Make mode more prominent with icon
+      -- Mode with icon
       opts.sections.lualine_a = {
         {
           "mode",
@@ -26,9 +26,20 @@ return {
           padding = { left = 1, right = 1 },
         },
       }
-      -- Remove progress percentage and line:column
+      -- Branch only
+      opts.sections.lualine_b = { "branch" }
+      -- File path breadcrumb — truncate from the left so you always see where you are
+      opts.sections.lualine_c = {
+        {
+          "filename",
+          path = 1, -- relative path
+          shorting_target = 0, -- don't truncate with dots
+        },
+      }
+      -- Remove diagnostics, progress, line:col
+      opts.sections.lualine_x = {}
       opts.sections.lualine_y = {}
-      -- Replace time with project directory name
+      -- Project directory name
       opts.sections.lualine_z = {
         {
           function()
