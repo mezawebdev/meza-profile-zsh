@@ -2,6 +2,13 @@ return {
   {
     "folke/snacks.nvim",
     opts = {
+      lazygit = {
+        win = {
+          style = "lazygit",
+          width = 0,
+          height = 0,
+        },
+      },
       dashboard = {
         preset = {
           header = table.concat({
