@@ -9,7 +9,10 @@ end, { desc = "Toggle Terminal" })
 
 -- Copy file paths to clipboard
 vim.api.nvim_create_user_command("CopyRelFilePath", function()
-  local path = vim.fn.expand("%")
+  local root = vim.fs.root(0, ".git") or vim.fn.getcwd()
+  local abs = vim.fn.expand("%:p")
+  if not root:match("/$") then root = root .. "/" end
+  local path = abs:sub(#root + 1)
   vim.fn.setreg("+", path)
   vim.notify("Copied: " .. path)
 end, {})
