@@ -8,6 +8,7 @@ vim.g.root_spec = { "cwd" }
 vim.opt.wrap = true
 
 -- Disable inlay hints (ghost type annotations from LSP)
+vim.g.lazyvim_inlay_hints = false
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     vim.lsp.inlay_hint.enable(false, { bufnr = args.buf })
