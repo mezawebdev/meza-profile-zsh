@@ -9,6 +9,6 @@ customCommands:
 git:
   pagers:
     - colorArg: always
-      pager: delta --paging=never
+      pager: agent-diff-pager
 os:
   editPreset: "zed"

@@ -9,6 +9,26 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/meza-profile-zsh/bin/agent-change-tracker"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/meza-profile-zsh/bin/agent-change-tracker"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

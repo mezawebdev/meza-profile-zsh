@@ -1,0 +1,188 @@
+#!/usr/bin/env python3
+"""agent-tracker - Live TUI showing file changes grouped by agent."""
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+from textual.app import App, ComposeResult
+from textual.widgets import Header, Footer, Tree, Static
+from textual.timer import Timer
+
+
+def get_git_info(project_dir: str = ".") -> tuple[str, str]:
+    """Return (project_root, branch_name)."""
+    try:
+        root = subprocess.check_output(
+            ["git", "-C", project_dir, "rev-parse", "--show-toplevel"],
+            text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        branch = subprocess.check_output(
+            ["git", "-C", project_dir, "rev-parse", "--abbrev-ref", "HEAD"],
+            text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        return root, branch
+    except subprocess.CalledProcessError:
+        return project_dir, "unknown"
+
+
+def get_diff_files(project_dir: str) -> set[str]:
+    """Return set of file paths with uncommitted changes (relative to repo root)."""
+    try:
+        output = subprocess.check_output(
+            ["git", "-C", project_dir, "diff", "--name-only", "HEAD"],
+            text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        # Also include untracked files
+        untracked = subprocess.check_output(
+            ["git", "-C", project_dir, "ls-files", "--others", "--exclude-standard"],
+            text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        files = set()
+        if output:
+            files.update(output.splitlines())
+        if untracked:
+            files.update(untracked.splitlines())
+        return files
+    except subprocess.CalledProcessError:
+        return set()
+
+
+def load_ledger(project_dir: str, branch: str) -> list[dict]:
+    """Load entries from the branch-scoped ledger."""
+    branch_safe = branch.replace("/", "-")
+    ledger_path = Path(project_dir) / ".claude" / f"agent-changes-{branch_safe}.jsonl"
+    entries = []
+    if ledger_path.exists():
+        for line in ledger_path.read_text().splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    entries.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+    return entries
+
+
+def build_agent_file_map(
+    entries: list[dict], diff_files: set[str], project_dir: str
+) -> dict[str, dict[str, list[list[int]]]]:
+    """Build {agent: {relative_file: [[start, end], ...]}} filtered to active diff files."""
+    agent_map: dict[str, dict[str, list[list[int]]]] = {}
+
+    for entry in entries:
+        agent = entry.get("agent", "user")
+        file_path = entry.get("file", "")
+        lines = entry.get("lines", [])
+
+        # Normalize to relative path
+        if file_path.startswith(project_dir):
+            rel_path = file_path[len(project_dir):].lstrip("/")
+        else:
+            rel_path = file_path
+
+        # Only include files that are in the active diff
+        if rel_path not in diff_files:
+            continue
+
+        if agent not in agent_map:
+            agent_map[agent] = {}
+        if rel_path not in agent_map[agent]:
+            agent_map[agent][rel_path] = []
+        if lines:
+            agent_map[agent][rel_path].append(lines)
+
+    # Add diff files not in ledger under "user"
+    ledger_files = set()
+    for files in agent_map.values():
+        ledger_files.update(files.keys())
+
+    unattributed = diff_files - ledger_files
+    if unattributed:
+        if "user" not in agent_map:
+            agent_map["user"] = {}
+        for f in sorted(unattributed):
+            agent_map["user"][f] = []
+
+    return agent_map
+
+
+class AgentTrackerApp(App):
+    """TUI app showing file changes grouped by agent."""
+
+    CSS = """
+    Tree {
+        padding: 1 2;
+    }
+    #status {
+        dock: bottom;
+        height: 1;
+        padding: 0 2;
+        background: $accent;
+        color: $text;
+    }
+    """
+
+    TITLE = "agent-tracker"
+    BINDINGS = [
+        ("q", "quit", "Quit"),
+        ("r", "refresh", "Refresh"),
+    ]
+
+    def __init__(self, project_dir: str = "."):
+        super().__init__()
+        self.project_dir = project_dir
+        self._timer: Timer | None = None
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Tree("Files by Agent")
+        yield Static("Loading...", id="status")
+        yield Footer()
+
+    def on_mount(self) -> None:
+        self.refresh_data()
+        self._timer = self.set_interval(2, self.refresh_data)
+
+    def refresh_data(self) -> None:
+        root, branch = get_git_info(self.project_dir)
+        diff_files = get_diff_files(root)
+        entries = load_ledger(root, branch)
+        agent_map = build_agent_file_map(entries, diff_files, root)
+
+        tree = self.query_one(Tree)
+        tree.clear()
+        tree.root.set_label(f"[bold]{branch}[/bold]")
+
+        agent_count = len(agent_map)
+        file_count = len(diff_files)
+
+        for agent, files in sorted(agent_map.items()):
+            agent_node = tree.root.add(f"[bold cyan]{agent}[/bold cyan]", expand=True)
+            for file_path, line_ranges in sorted(files.items()):
+                if line_ranges:
+                    ranges_str = ", ".join(
+                        f"{lr[0]}-{lr[1]}" if lr[0] != lr[1] else str(lr[0])
+                        for lr in line_ranges
+                    )
+                    agent_node.add_leaf(f"{file_path}  [dim][{ranges_str}][/dim]")
+                else:
+                    agent_node.add_leaf(file_path)
+
+        tree.root.expand_all()
+
+        status = self.query_one("#status", Static)
+        status.update(
+            f" {branch} | {agent_count} agent{'s' if agent_count != 1 else ''} | "
+            f"{file_count} file{'s' if file_count != 1 else ''} changed"
+        )
+
+    def action_refresh(self) -> None:
+        self.refresh_data()
+
+
+if __name__ == "__main__":
+    project_dir = sys.argv[1] if len(sys.argv) > 1 else "."
+    app = AgentTrackerApp(project_dir)
+    app.run()

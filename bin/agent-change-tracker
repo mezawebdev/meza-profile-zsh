@@ -1,0 +1,54 @@
+#!/bin/bash
+# agent-change-tracker - PostToolUse hook that logs agent file attribution
+# Reads Claude Code hook JSON from stdin, appends to branch-scoped JSONL ledger.
+
+set -uo pipefail
+
+INPUT=$(cat)
+
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+
+# Only track Edit and Write tools
+if [[ "$TOOL_NAME" != "Edit" && "$TOOL_NAME" != "Write" ]]; then
+  exit 0
+fi
+
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path')
+AGENT="${AGENT_NAME:-user}"
+PROJECT_DIR=$(echo "$INPUT" | jq -r '.cwd')
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Determine branch for scoped ledger
+BRANCH=$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+# Sanitize branch name for filename (replace / with -)
+BRANCH_SAFE=$(echo "$BRANCH" | tr '/' '-')
+
+LEDGER_DIR="$PROJECT_DIR/.claude"
+LEDGER="$LEDGER_DIR/agent-changes-${BRANCH_SAFE}.jsonl"
+mkdir -p "$LEDGER_DIR"
+
+# Calculate affected line range
+if [[ "$TOOL_NAME" == "Edit" ]]; then
+  OLD_STRING=$(echo "$INPUT" | jq -r '.tool_input.old_string')
+  NEW_STRING=$(echo "$INPUT" | jq -r '.tool_input.new_string')
+
+  if [[ -f "$FILE_PATH" ]]; then
+    # Find the start line of new_string in the file (post-edit, old_string is gone)
+    START_LINE=$(grep -nF "$(echo "$NEW_STRING" | head -1)" "$FILE_PATH" 2>/dev/null | head -1 | cut -d: -f1)
+    if [[ -z "$START_LINE" ]]; then
+      START_LINE=1
+    fi
+    NEW_LINE_COUNT=$(echo "$NEW_STRING" | wc -l | tr -d ' ')
+    END_LINE=$((START_LINE + NEW_LINE_COUNT - 1))
+  else
+    START_LINE=1
+    END_LINE=1
+  fi
+elif [[ "$TOOL_NAME" == "Write" ]]; then
+  START_LINE=1
+  CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content')
+  END_LINE=$(echo "$CONTENT" | wc -l | tr -d ' ')
+fi
+
+# Append to ledger
+echo "{\"agent\":\"$AGENT\",\"file\":\"$FILE_PATH\",\"lines\":[$START_LINE,$END_LINE],\"timestamp\":\"$TIMESTAMP\"}" >> "$LEDGER"

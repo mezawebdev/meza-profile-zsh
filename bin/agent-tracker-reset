@@ -1,0 +1,16 @@
+#!/bin/bash
+# agent-tracker-reset - Clear the agent change ledger for the current branch
+
+set -uo pipefail
+
+PROJECT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+BRANCH_SAFE=$(echo "$BRANCH" | tr '/' '-')
+LEDGER="$PROJECT_DIR/.claude/agent-changes-${BRANCH_SAFE}.jsonl"
+
+if [[ -f "$LEDGER" ]]; then
+  rm "$LEDGER"
+  echo "Cleared ledger for branch: $BRANCH"
+else
+  echo "No ledger found for branch: $BRANCH"
+fi

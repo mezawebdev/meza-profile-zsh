@@ -86,7 +86,7 @@ dispatch_one() {
   sleep 0.3
 
   # Send command to the new tab
-  cmux send --surface "$surface_id" "cd $WORK_DIR && claude --dangerously-skip-permissions --chrome < $temp_file; rm -f $temp_file"
+  cmux send --surface "$surface_id" "cd $WORK_DIR && AGENT_NAME='$name' claude --dangerously-skip-permissions --chrome --name '$name' < $temp_file; rm -f $temp_file"
   cmux send-key --surface "$surface_id" enter
 
   echo "Dispatched${name:+ [$name]} to $surface_id"

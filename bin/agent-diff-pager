@@ -1,0 +1,71 @@
+#!/bin/bash
+# agent-diff-pager - Annotates diff hunks with agent attribution, then pipes to delta
+# Used as lazygit's pager in place of delta directly.
+
+set -uo pipefail
+
+PROJECT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+BRANCH_SAFE=$(echo "$BRANCH" | tr '/' '-')
+LEDGER="$PROJECT_DIR/.claude/agent-changes-${BRANCH_SAFE}.jsonl"
+
+# If no ledger exists, just pass through to delta
+if [[ ! -f "$LEDGER" ]]; then
+  exec delta --paging=never
+fi
+
+# Read the full diff from stdin
+DIFF_INPUT=$(cat)
+
+# Get list of files currently in git diff (uncommitted changes only)
+DIFF_FILES=$(git -C "$PROJECT_DIR" diff --name-only 2>/dev/null)
+
+# Build a lookup: for each file+line range in the ledger, store agent names
+# We'll process the diff line by line and annotate hunk headers
+CURRENT_FILE=""
+
+echo "$DIFF_INPUT" | while IFS= read -r line; do
+  # Detect file header: +++ b/path/to/file
+  if [[ "$line" =~ ^\+\+\+\ b/(.*) ]]; then
+    CURRENT_FILE="${BASH_REMATCH[1]}"
+  fi
+
+  # Detect hunk header: @@ -old,count +new,count @@
+  if [[ "$line" =~ ^@@\ -[0-9]+(,[0-9]+)?\ \+([0-9]+)(,[0-9]+)?\ @@ ]]; then
+    HUNK_START="${BASH_REMATCH[2]}"
+    HUNK_COUNT="${BASH_REMATCH[3]}"
+    HUNK_COUNT="${HUNK_COUNT#,}"  # remove leading comma
+    HUNK_COUNT="${HUNK_COUNT:-1}"
+    HUNK_END=$((HUNK_START + HUNK_COUNT - 1))
+
+    if [[ -n "$CURRENT_FILE" ]]; then
+      FULL_PATH="$PROJECT_DIR/$CURRENT_FILE"
+
+      # Find agents that have overlapping line ranges for this file
+      AGENTS=$(jq -r --arg file "$FULL_PATH" --argjson hs "$HUNK_START" --argjson he "$HUNK_END" '
+        select(.file == $file) |
+        select(.lines[0] <= $he and .lines[1] >= $hs) |
+        .agent
+      ' "$LEDGER" 2>/dev/null | sort -u | paste -sd ", " -)
+
+      if [[ -z "$AGENTS" ]]; then
+        # Check with relative path too
+        AGENTS=$(jq -r --arg file "$CURRENT_FILE" --argjson hs "$HUNK_START" --argjson he "$HUNK_END" '
+          select(.file | endswith($file)) |
+          select(.lines[0] <= $he and .lines[1] >= $hs) |
+          .agent
+        ' "$LEDGER" 2>/dev/null | sort -u | paste -sd ", " -)
+      fi
+
+      if [[ -z "$AGENTS" ]]; then
+        AGENTS="user"
+      fi
+
+      # Print attribution header with color (cyan)
+      printf '\033[36m─── agent: %s ───\033[0m\n' "$AGENTS"
+    fi
+  fi
+
+  # Pass through the original line
+  echo "$line"
+done | delta --paging=never
