@@ -6,3 +6,13 @@
 --
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+
+-- Gold directory icons instead of default blue
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = vim.api.nvim_create_augroup("custom_directory_colors", { clear = true }),
+  callback = function()
+    vim.api.nvim_set_hl(0, "MiniIconsAzure", { fg = "#e8ab53" })
+  end,
+})
+-- Also apply immediately in case colorscheme already loaded
+vim.api.nvim_set_hl(0, "MiniIconsAzure", { fg = "#e8ab53" })
