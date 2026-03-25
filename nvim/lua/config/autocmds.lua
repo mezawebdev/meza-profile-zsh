@@ -11,8 +11,7 @@
 vim.api.nvim_create_autocmd("ColorScheme", {
   group = vim.api.nvim_create_augroup("custom_directory_colors", { clear = true }),
   callback = function()
-    vim.api.nvim_set_hl(0, "MiniIconsAzure", { fg = "#e8ab53" })
+    vim.api.nvim_set_hl(0, "MiniIconsDirectory", { fg = "#e8ab53" })
   end,
 })
--- Also apply immediately in case colorscheme already loaded
-vim.api.nvim_set_hl(0, "MiniIconsAzure", { fg = "#e8ab53" })
+vim.api.nvim_set_hl(0, "MiniIconsDirectory", { fg = "#e8ab53" })
