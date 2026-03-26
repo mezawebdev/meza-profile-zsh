@@ -25,6 +25,8 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.linting.eslint" },
     { import = "lazyvim.plugins.extras.formatting.prettier" },
+    -- Python support
+    { import = "lazyvim.plugins.extras.lang.python" },
     -- PHP/Laravel support
     { import = "lazyvim.plugins.extras.lang.php" },
     -- import/override with your plugins
