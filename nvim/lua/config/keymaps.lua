@@ -31,6 +31,9 @@ vim.keymap.set("n", "<leader>m", function()
   vim.notify("Mouse reset")
 end, { desc = "Reset mouse mode" })
 
+-- jk to escape insert mode
+vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
+
 -- Insert Mode: Cmd + Arrows (macOS style navigation)
 vim.keymap.set("i", "<D-Left>", "<Home>", { desc = "Move to beginning of line" })
 vim.keymap.set("i", "<D-Right>", "<End>", { desc = "Move to end of line" })
