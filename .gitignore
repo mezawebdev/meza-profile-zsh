@@ -3,5 +3,6 @@
 claude/*
 !claude/settings.json
 !claude/agents/
-!claude/commands
+!claude/commands/
+!claude/skills/
 lazygit/.config.yml.swp
