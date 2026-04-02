@@ -31,6 +31,11 @@ vim.keymap.set("n", "<leader>m", function()
   vim.notify("Mouse reset")
 end, { desc = "Reset mouse mode" })
 
+-- Delete without yanking (d/D never cut, just delete)
+vim.keymap.set("n", "d", '"_d', { desc = "Delete without yanking" })
+vim.keymap.set("n", "D", '"_D', { desc = "Delete to end of line without yanking" })
+vim.keymap.set("v", "d", '"_d', { desc = "Delete without yanking" })
+
 -- jk to escape insert mode
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
