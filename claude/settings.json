@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "terminal-notifier -title 'Claude Code' -message 'Done' -appIcon ~/meza-zsh-profile/images/robot.png -sound default"
+            "command": "say done"
           }
         ]
       }

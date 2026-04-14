@@ -1,6 +1,7 @@
 return {
   {
     "coder/claudecode.nvim",
+    event = "VeryLazy",
     config = true,
     opts = {
       -- Don't open Claude in a Neovim terminal - we run it in cmux
