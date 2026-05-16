@@ -16,11 +16,10 @@ return {
   },
   init = function()
     local function unfade_hidden()
-      vim.api.nvim_set_hl(0, "SnacksPickerDirHidden", { link = "SnacksPickerDir" })
-      vim.api.nvim_set_hl(0, "SnacksPickerFileHidden", { link = "SnacksPickerFile" })
-      vim.api.nvim_set_hl(0, "SnacksPickerPathHidden", { link = "SnacksPickerPath" })
+      local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+      vim.api.nvim_set_hl(0, "SnacksPickerPathHidden", { fg = normal.fg })
+      vim.api.nvim_set_hl(0, "SnacksPickerPathIgnored", { fg = normal.fg })
     end
-    vim.api.nvim_create_autocmd("ColorScheme", { callback = unfade_hidden })
-    unfade_hidden()
+    vim.api.nvim_create_autocmd({ "VimEnter", "ColorScheme" }, { callback = unfade_hidden })
   end,
 }
