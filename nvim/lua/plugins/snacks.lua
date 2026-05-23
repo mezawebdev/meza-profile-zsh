@@ -6,10 +6,17 @@ return {
         explorer = {
           hidden = true,
           ignored = true,
+          exclude = { "node_modules", ".git" },
         },
         files = {
           hidden = true,
           ignored = true,
+          exclude = { "node_modules", ".git" },
+        },
+        grep = {
+          hidden = true,
+          ignored = true,
+          exclude = { "node_modules", ".git" },
         },
       },
     },
