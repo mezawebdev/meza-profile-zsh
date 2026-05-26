@@ -5,6 +5,9 @@
 -- Disable automatic root detection for monorepos - always use cwd
 vim.g.root_spec = { "cwd" }
 
+-- Use intelephense instead of phpactor (better cross-file gd, no composer.json required at root)
+vim.g.lazyvim_php_lsp = "intelephense"
+
 vim.opt.wrap = true
 
 -- Blinking cursor
