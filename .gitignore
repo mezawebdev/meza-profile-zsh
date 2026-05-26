@@ -6,3 +6,4 @@ claude/*
 !claude/commands/
 !claude/skills/
 lazygit/.config.yml.swp
+.claude/agent-changes-main.jsonl

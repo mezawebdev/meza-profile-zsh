@@ -44,6 +44,6 @@
     "superpowers@superpowers-marketplace": true
   },
   "effortLevel": "high",
-  "voiceEnabled": false,
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "voiceEnabled": false
 }
