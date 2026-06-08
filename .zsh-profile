@@ -90,6 +90,7 @@ export CLAUDE_CONFIG_DIR="$HOME/meza-profile-zsh/claude"
 alias at="agent-tracker"
 alias claude-danger="claude --dangerously-skip-permissions"
 alias claude-danger-chrome="claude --dangerously-skip-permissions --chrome"
+alias cld="claude-danger"
 
 # export EDITOR="code --wait"
 

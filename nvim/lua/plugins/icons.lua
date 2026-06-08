@@ -4,7 +4,7 @@ return {
 
   -- Gold directory icons (without affecting file type icons like TypeScript)
   {
-    "echasnovski/mini.icons",
+    "nvim-mini/mini.icons",
     opts = {
       default = {
         directory = { glyph = "󰉋", hl = "MiniIconsDirectory" },

@@ -6,7 +6,7 @@ return {
         explorer = {
           hidden = true,
           ignored = true,
-          exclude = { "node_modules", ".git" },
+          exclude = { ".git" },
         },
         files = {
           hidden = true,
