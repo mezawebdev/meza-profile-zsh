@@ -49,8 +49,10 @@
   },
   "effortLevel": "high",
   "tui": "fullscreen",
+  "prefersReducedMotion": true,
   "skipDangerousModePermissionPrompt": true,
-  "autoScrollEnabled": false,
-  "voiceEnabled": false,
-  "editorMode": "vim"
+  "editorMode": "vim",
+  "autoScrollEnabled": true,
+  "wheelScrollAccelerationEnabled": true,
+  "voiceEnabled": false
 }
