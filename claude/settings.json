@@ -2,6 +2,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
+  "model": "claude-opus-4-8",
   "hooks": {
     "Stop": [
       {
@@ -36,8 +37,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "$HOME/meza-profile-zsh/bin/claude-statusline",
-    "hideVimModeIndicator": true
+    "command": "$HOME/meza-profile-zsh/bin/claude-statusline"
   },
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
@@ -51,7 +51,6 @@
   "tui": "fullscreen",
   "prefersReducedMotion": true,
   "skipDangerousModePermissionPrompt": true,
-  "editorMode": "vim",
   "autoScrollEnabled": true,
   "wheelScrollAccelerationEnabled": true,
   "voiceEnabled": false

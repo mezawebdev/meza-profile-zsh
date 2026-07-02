@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code statusline: colored vim mode label + branch | model | dir | tokens
+# Claude Code statusline: branch | model | dir | tokens
 # Receives the statusline JSON payload on stdin.
 
 input=$(cat)
@@ -11,15 +11,5 @@ total_in=$(echo "$input" | jq -r '.context_window.total_input_tokens')
 total_out=$(echo "$input" | jq -r '.context_window.total_output_tokens')
 used=$((total_in + total_out))
 
-# Colored vim mode label (LazyVim-ish palette: dark fg on a colored block)
-mode=$(echo "$input" | jq -r '.vim.mode // "INSERT"')
-case "$mode" in
-  NORMAL)  color="48;5;75;38;5;232"  ;;  # blue
-  INSERT)  color="48;5;114;38;5;232" ;;  # green
-  VISUAL*) color="48;5;176;38;5;232" ;;  # magenta
-  REPLACE) color="48;5;210;38;5;232" ;;  # red
-  *)       color="48;5;245;38;5;232" ;;  # grey fallback
-esac
-
-printf "\033[1;%sm %s \033[0m branch: %s | model: %s | dir: %s | tokens: %s" \
-  "$color" "$mode" "$branch" "$model" "$project" "$used"
+printf "branch: %s | model: %s | dir: %s | tokens: %s" \
+  "$branch" "$model" "$project" "$used"
